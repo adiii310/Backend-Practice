@@ -1,0 +1,25 @@
+{
+  "name": "snaptube",
+  "version": "1.0.0",
+  "description": "This is a vidoe streaming backeend just like youtube",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "youtubeclone",
+    "videostreaming"
+  ],
+  "author": "Aditya Thakur",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.1",
+    "express": "^4.18.2",
+    "mongoose": "^8.1.1"
+  }
+}
