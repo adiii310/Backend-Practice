@@ -15,7 +15,8 @@
   "author": "Aditya Thakur",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^3.0.3"
+    "nodemon": "^3.0.3",
+    "prettier": "^3.2.5"
   },
   "dependencies": {
     "dotenv": "^16.4.1",
