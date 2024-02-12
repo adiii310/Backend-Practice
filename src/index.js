@@ -57,7 +57,7 @@ const app = express();
 
 ;(async () => {
     try{
-        await mongoose.connect(`mongodb+srv://aditya:aditya123@cluster0.nnxzcxj.mongodb.net/${DB_NAME}`)
+        await mongoose.connect(`mongodb+srv://aditya:<password>@cluster0.nnxzcxj.mongodb.net/${DB_NAME}`)
         app.on("error",(error)=>{
             console.log("Error In app.on :"+ error);
             throw error
