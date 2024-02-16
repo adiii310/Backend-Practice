@@ -5,6 +5,55 @@
 `SnpaTube`
 
 description: This is a website just like youtube.
+# Table of Contents
+
+1. [Introduction](#introduction)
+   - [Project Name](#project-name)
+   - [Description](#description)
+2. [Setting Up Files and Folders](#setting-up-files-and-folders)
+   - [Public and Src Folders](#public-and-src-folders)
+   - [Initializing NPM](#initializing-npm)
+   - [Creating .env and .gitignore Files](#creating-env-and-gitignore-files)
+3. [Connecting to MongoDB Atlas](#connecting-to-mongodb-atlas)
+   - [Importing .env File](#importing-env-file)
+   - [Changing package.json](#changing-packagejson)
+   - [Setting package.json for .env File](#setting-packagejson-for-env-file)
+   - [Creating ConnectionDB Function](#creating-connectiondb-function)
+   - [Inside the Try-Catch Block](#inside-the-try-catch-block)
+   - [Exporting the Function](#exporting-the-function)
+   - [Importing and Calling ConnectionDB](#importing-and-calling-connectiondb)
+4. [Server Entry Point Documentation](#server-entry-point-documentation)
+   - [Dependencies](#dependencies)
+   - [Environment Configuration](#environment-configuration)
+   - [Database Connection](#database-connection)
+   - [Server Configuration](#server-configuration)
+   - [Routing](#routing)
+   - [Usage](#usage)
+5. [Express Application Setup Documentation](#express-application-setup-documentation)
+   - [Dependencies](#dependencies)
+   - [Application Initialization](#application-initialization)
+   - [Middleware Configuration](#middleware-configuration)
+   - [Environment Variables](#environment-variables)
+   - [Exporting the Application](#exporting-the-application)
+   - [Usage](#usage)
+6. [Utils Folder](#utils-folder)
+   - [Custom Classes](#custom-classes)
+   - [AsyncHandler](#asynchandler)
+   - [ApiError](#apierror)
+   - [ApiResponse](#apiresponse)
+7. [User Model Documentation](#user-model-documentation)
+   - [Schema Definition](#schema-definition)
+   - [Middleware](#middleware)
+   - [Methods](#methods)
+   - [Environment Variables](#environment-variables)
+   - [Exporting the Model](#exporting-the-model)
+   - [Usage](#usage)
+8. [Video Model Documentation](#video-model-documentation)
+   - [Schema Definition](#schema-definition)
+   - [Plugins](#plugins)
+   - [Exporting the Model](#exporting-the-model)
+   - [Usage](#usage)
+
 
 # setting up files and folders
 
@@ -50,56 +99,86 @@ dev :"ndoemon -r dotenv/config --experimental-json-modules src/index.js
 
 - imoport it inside the index.js and call it
 
-# Setting up index.js
-### after writting connecion method in db file we will use that mehtod in index.js 
+# Server Entry Point Documentation
 
-> importing the mehtod and using it
+This document provides an overview of the server entry point, which is responsible for configuring and starting the Express application server.
 
- ### connectDB()
- - this method will return promise so we will use .then() and .catch() method
+## Dependencies
 
- ```
- connectionDB()
- .then()
- .catch()
+The entry point uses the following dependencies:
 
- ```
- ### connectDB.then()
-  > we will write the express app here
-  - app.on()
+- `dotenv`: A zero-dependency module that loads environment variables from a `.env` file into `process.env`.
+- `connectDB`: A function that connects to the MongoDB database.
+- `app`: The configured Express application instance.
 
-  - app.listen()
-  
-  - app.get() 
+## Environment Configuration
 
-### connectDB.catch()
- > consoling the error
+The `dotenv` package is used to load environment variables from a `.env` file located in the `./env` directory. This allows sensitive information, such as database credentials and server configuration, to be stored securely and separated from the codebase.
 
-# app.js file
 
-### we are using
+## Database Connection
 
-- cookieParser package
+The `connectDB` function is called to establish a connection to the MongoDB database. This function should return a promise that resolves when the connection is successful.
 
-  - using cookieparse method
-    > cookieParse()
 
-- cors package to solve cors origin
+## Server Configuration
 
-  - ti takes an object as argument
-    - origin which shows what is the origin allowed here
-    - credentials
+The server is configured to listen on the port specified by the `PORT` environment variable. An error event listener is added to the `app` instance to log any errors that occur while the server is running.
 
-- applying json limit
 
-  > express.json({limit:""})
+## Routing
 
-- Reading form the encoded url
+A simple root route is defined to respond with a message indicating the server's port.
 
-  > express.urlencoded({extended: true, limit:""})
 
-- defining the static file
-  > express.static(file name/path)
+## Usage
+
+To start the server, run the entry point file. This will initialize the environment variables, connect to the database, and start the Express application server.
+
+
+# Express Application Setup Documentation
+
+This document provides an overview of the Express application setup, which is used to configure the server for handling HTTP requests in the application.
+
+## Dependencies
+
+The application uses the following dependencies:
+
+- `express`: A minimal and flexible Node.js web application framework that provides a robust set of features for web and mobile applications.
+- `cookie-parser`: A middleware to parse Cookie header and populate `req.cookies` with an object keyed by the cookie names.
+- `cors`: A package for providing a Connect/Express middleware that can be used to enable CORS with various options.
+
+## Application Initialization
+
+The Express application is initialized with the following code:
+
+
+## Middleware Configuration
+
+The application uses several middleware functions for various purposes:
+
+- `cors`: Configured with the `origin` option set to `process.env.CORS_ORIGIN` and `credentials` set to `true`. This allows the server to accept cross-origin requests and handle cookies.
+- `express.json`: Configured with a limit of "10kb" to parse incoming requests with JSON payloads.
+- `express.urlencoded`: Configured with `extended: true` and a limit of "10kb" to parse incoming requests with URL-encoded payloads.
+- `express.static`: Serves static files from the "public" directory.
+- `cookieParser`: Parses Cookie header and populates `req.cookies` with an object keyed by the cookie names.
+
+## Environment Variables
+
+The application uses the following environment variables:
+
+- `process.env.port`: The port on which the server will listen for incoming requests.
+- `process.env.CORS_ORIGIN`: The origin that is allowed to make cross-origin requests to the server.
+
+## Exporting the Application
+
+The configured Express application is exported as `app`, which can be used in other parts of the application to set up routes and start the server.
+
+## Usage
+
+To use the exported `app`, you would typically import it into your server entry point file and start the server with the following code:
+
+
 
 
 # UTILS Folder
@@ -114,3 +193,83 @@ dev :"ndoemon -r dotenv/config --experimental-json-modules src/index.js
   > it have construcctor which overrides the error method
 - ApiResponse
   > this is the custom class for api response , this also use the constructor to override the metohds.
+
+# User Model Documentation
+
+This document provides an overview of the `User` model in the application, which is used to manage user data in the MongoDB database. The `User` model is defined using Mongoose, a MongoDB object modeling tool designed to work in an asynchronous environment.
+
+## Schema Definition
+
+The `User` schema is defined with the following fields:
+
+- `userName`: A unique, lowercase, trimmed string that represents the user's chosen username.
+- `email`: A unique, lowercase, trimmed string that represents the user's email address.
+- `fullName`: A string that represents the user's full name.
+- `avatar`: A string that represents the URL to the user's avatar image.
+- `coverImage`: A string that represents the URL to the user's cover image.
+- `password`: A string that represents the user's hashed password.
+- `watchHistory`: An array of ObjectIds referencing the `Video` model, representing the videos the user has watched.
+- `refreshToken`: A string that represents the user's refresh token for authentication purposes.
+
+The schema also includes timestamps, which automatically add `createdAt` and `updatedAt` fields to the documents.
+
+## Middleware
+
+The `pre('save')` middleware is used to hash the user's password before saving the document to the database. This ensures that the plain-text password is never stored.
+
+## Methods
+
+The `User` model includes several methods for handling authentication and token generation:
+
+- `isPasswordCorrect(password)`: An asynchronous method that compares a given password with the stored hashed password to determine if they match.
+- `generateAccessToken()`: A method that generates a JSON Web Token (JWT) for access authentication. The token includes the user's `_id`, `userName`, `email`, and `fullName`. The token's expiration time is set by the `EXPIRY_ACCESS_TOKEN` environment variable.
+- `generateRefreshToken()`: A method that generates a JWT for refresh authentication. The token includes the same information as the access token. The token's expiration time is set by the `EXPIRY_REFRESH_TOKEN` environment variable.
+
+## Environment Variables
+
+The `generateAccessToken` and `generateRefreshToken` methods rely on the following environment variables:
+
+- `SECRET_ACCESS_TOKEN`: The secret key used to sign the access token.
+- `SECRET_REFRESH_TOKEN`: The secret key used to sign the refresh token.
+- `EXPIRY_ACCESS_TOKEN`: The duration for which the access token is valid.
+- `EXPIRY_REFRESH_TOKEN`: The duration for which the refresh token is valid.
+
+## Exporting the Model
+
+The `User` model is exported as a Mongoose model, which can be used to create, read, update, and delete documents in the MongoDB database.
+
+## Usage
+
+To use the `User` model, you would typically import it into your application code and use it to interact with the user data. For example, to create a new user, you would instantiate a new `User` object with the required fields and call the `save` method.
+
+# Video Model Documentation
+
+This document provides an overview of the `Video` model in the application, which is used to manage video data in the MongoDB database. The `Video` model is defined using Mongoose, a MongoDB object modeling tool designed to work in an asynchronous environment.
+
+## Schema Definition
+
+The `Video` schema is defined with the following fields:
+
+- `videofile`: A string that represents the URL or path to the video file.
+- `thumbnail`: A string that represents the URL or path to the video thumbnail image.
+- `title`: A string that represents the title of the video.
+- `description`: A string that represents the description of the video.
+- `isPublished`: A string that indicates whether the video is published or not.
+- `duration`: A number that represents the duration of the video in seconds.
+- `views`: A number that represents the number of views the video has received, with a default value of  0.
+- `owner`: An ObjectId that references the `User` model, representing the user who owns the video.
+
+The schema also includes timestamps, which automatically add `createdAt` and `updatedAt` fields to the documents.
+
+## Plugins
+
+The `mongoose-aggregate-paginate-v2` plugin is used to add pagination capabilities to the `Video` model. This allows for efficient retrieval of paginated results when querying the database.
+
+## Exporting the Model
+
+The `Video` model is exported as a Mongoose model, which can be used to create, read, update, and delete documents in the MongoDB database.
+
+## Usage
+
+To use the `Video` model, you would typically import it into your application code and use it to interact with the video data. For example, to create a new video, you would instantiate a new `Video` object with the required fields and call the `save` method.
+
