@@ -273,3 +273,53 @@ The `Video` model is exported as a Mongoose model, which can be used to create, 
 
 To use the `Video` model, you would typically import it into your application code and use it to interact with the video data. For example, to create a new video, you would instantiate a new `Video` object with the required fields and call the `save` method.
 
+# File Upload to Cloudinary with Multer
+
+## Description
+
+This project demonstrates how to upload files to Cloudinary using the Multer middleware in a Node.js application. It includes a setup for Cloudinary configuration and a Multer storage engine to handle file uploads.
+
+## Dependencies
+
+- `cloudinary`: A cloud-based service that offers an end-to-end solution for uploading, storing, managing, manipulating, and delivering images and videos.
+- `multer`: A middleware for handling `multipart/form-data`, which is primarily used for uploading files.
+
+## Installation
+
+To install the dependencies, run the following command in your terminal:
+
+bash npm install cloudinary multer
+
+## Usage
+
+1. Set the environment variables `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` in your `.env` file or your environment.
+2. Use the `upload` middleware in your Express routes to handle file uploads.
+3. Call the `uploadOnCloudinary` function with the local file path to upload the file to Cloudinary.
+
+## Cloudinary Configuration
+
+The Cloudinary configuration is done using the `cloudinary.config` method. You need to provide your Cloudinary `cloud_name`, `api_key`, and `api_secret` as environment variables.
+
+## Multer Configuration
+
+The Multer storage engine is configured to save uploaded files temporarily in the `../public/temp` directory with their original filenames.
+
+## Uploading Files to Cloudinary
+
+The `uploadOnCloudinary` function is an asynchronous function that takes a local file path as an argument. It uploads the file to Cloudinary and returns the response from Cloudinary, which includes the URL of the uploaded file.
+
+## Error Handling
+
+In case of an error during the upload, the local file is deleted using `fs.unlinkSync`, and the function returns `null`.
+
+## Example Usage
+
+To use the `upload` middleware in an Express route, you can do the following:
+
+javascript import express from 'express'; import { upload } from './multerConfig'; import { uploadOnCloudinary } from './cloudinaryConfig';
+
+const app = express();
+
+app.post('/upload', upload.single('file'), async (req, res) => { try { const response = await uploadOnCloudinary(req.file.path); if (response) { res.json({ url: response.url }); } else { res.status(500).send('File upload failed'); } } catch (error) { res.status(500).send('File upload failed'); } });
+
+app.listen(3000, () => { console.log('Server is running on port 3000'); });
