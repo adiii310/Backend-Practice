@@ -36,7 +36,7 @@ const registerUser = asyncHandler(async (req, res) => {
   if ([userName, email, password, fullName].some((item) => item === "")) {
     throw new ApiError(400, "All fields are required");
   }
-  
+
   const existingUser = await User.findOne({
     $or: [{ userName, email }],
   });
@@ -126,4 +126,23 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
-export { registerUser, loginUser };
+const logoutUser = asyncHandler(async (req, res) => {
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $unset: {
+          refreshToken: 1 // this removes the field from document
+      }
+  },
+    { new: true }
+  );
+  const options= {
+    httpOnly:true,
+    secure:true,
+  }
+  const user = User.findById(req.user._id)
+  console.log(user)
+  res.status(200).clearCookie("accessToken",options).clearCookie("refershToken",options).json(new ApiResponse(200,"user logged out sucessfully"))
+});
+
+export { registerUser, loginUser, logoutUser };
