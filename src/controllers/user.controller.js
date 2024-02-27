@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import jwt from "jsonwebtoken";
 
 const generateAccessTokenAndRefershToken = async (userId) => {
   try {
@@ -96,9 +97,8 @@ const loginUser = asyncHandler(async (req, res) => {
 
   if (!isValidPassword) throw new ApiError(404, "Incorrect Password");
 
-  const { accessToken, refreshToken } = await generateAccessTokenAndRefershToken(
-    user._id
-  );
+  const { accessToken, refreshToken } =
+    await generateAccessTokenAndRefershToken(user._id);
 
   const loggedInUser = await User.findById(user._id).select(
     "-password -refreshToken "
@@ -131,18 +131,66 @@ const logoutUser = asyncHandler(async (req, res) => {
     req.user._id,
     {
       $unset: {
-          refreshToken: 1 // this removes the field from document
-      }
-  },
+        refreshToken: 1, // this removes the field from document
+      },
+    },
     { new: true }
   );
-  const options= {
-    httpOnly:true,
-    secure:true,
-  }
-  const user = User.findById(req.user._id)
-  console.log(user)
-  res.status(200).clearCookie("accessToken",options).clearCookie("refershToken",options).json(new ApiResponse(200,"user logged out sucessfully"))
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+  const user = User.findById(req.user._id);
+  res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, "user logged out sucessfully"));
 });
 
-export { registerUser, loginUser, logoutUser };
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  const incomingRefreshToken =
+    req.cookies.refreshToken || req.body.refreshToken;
+
+  if (!incomingRefreshToken) {
+    throw new ApiError(401, "Refresh token not found");
+  }
+
+  const decodedInformatin = jwt.verify(
+    incomingRefreshToken,
+    process.env.SECRET_REFRESH_TOKEN
+  );
+
+  if (!decodedInformatin) {
+    throw new ApiError(401, "token verification failed");
+  }
+
+  const user = await User.findById(decodedInformatin._id);
+
+  if (!user) {
+    throw new ApiError(401, "User doesnot exsist");
+  }
+
+  if (incomingRefreshToken !== user?.refreshToken) {
+    throw new ApiError(401, "refresh token mismatch or expired");
+  }
+
+  const { accessToken, refreshToken } = await generateAccessTokenAndRefershToken(
+    user._id
+  );
+
+  console.log(accessToken)
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(new ApiResponse(200, { user, accessToken, refreshToken }));
+});
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken };
