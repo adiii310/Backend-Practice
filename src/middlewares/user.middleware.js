@@ -22,6 +22,6 @@ export const verifyjwt = asyncHandler(async (req, _, next) => {
     req.user = user;
     next();
   } catch (error) {
-    throw new ApiError(401,  "verification failed ");
+    throw new ApiError(401,  "verification failed please login first ");
   }
 });

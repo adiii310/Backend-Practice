@@ -1,7 +1,10 @@
 import asyncHandler from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+  uploadOnCloudinary,
+  deleteFromCloudinary,
+} from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
@@ -105,11 +108,14 @@ const loginUser = asyncHandler(async (req, res) => {
   );
 
   const options = {
-    httpOnly: true,
-    secure: true,
+    httpOnly: true, // Prevents access from client-side scripts
+    secure: false, // Not needed for localhost
+    sameSite: "Lax", // Allows cookies to be sent with top-level navigations
+    path: "/", // Available for all paths
+    domain: "localhost", // Set to localhost for development
   };
 
-  res
+  return res
     .status(200)
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
@@ -141,6 +147,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     secure: true,
   };
   const user = User.findById(req.user._id);
+  console.log(user);
   res
     .status(200)
     .clearCookie("accessToken", options)
@@ -175,11 +182,10 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     throw new ApiError(401, "refresh token mismatch or expired");
   }
 
-  const { accessToken, refreshToken } = await generateAccessTokenAndRefershToken(
-    user._id
-  );
+  const { accessToken, refreshToken } =
+    await generateAccessTokenAndRefershToken(user._id);
 
-  console.log(accessToken)
+  console.log(accessToken);
 
   const options = {
     httpOnly: true,
@@ -193,4 +199,80 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { user, accessToken, refreshToken }));
 });
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken };
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  const user = await User.findById(req.user._id);
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+
+  if (!isPasswordCorrect) {
+    throw new ApiError(400, "Invalid old password");
+  }
+
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Password changed successfully"));
+});
+
+const changeAvatar = asyncHandler(async (req, res) => {
+  const avatarLocalPath = req.file.path;
+
+  if (!avatarLocalPath) {
+    throw new ApiError(400, "avatar File not present");
+  }
+  const avatarurl = await User.findById(req.user._id);
+  console.log(avatarurl.avatar + "--------------------------");
+  await deleteFromCloudinary(avatarurl.avatar);
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
+  if (!avatar) {
+    throw new ApiError(500, "File doesnot upload on Cloudinary");
+  }
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        avatar: avatar?.url,
+      },
+    },
+    { new: true }
+  ).select("-password -refreshToken");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { user }, "avatar updated sucessfully"));
+});
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select(
+    "-password -refreshToken"
+  );
+  const userName = user.userName;
+
+  return res.status(200).json(new ApiResponse(200, { user }, "sucess"));
+});
+
+const getAllUsers = asyncHandler(async (req, res) => {
+  try {
+    const users = await User.find({}, "-password -refreshToken");
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, users, "Password changed successfully"));
+  } catch (error) {
+    throw new ApiError(500, "An error occurred while retrieving users");
+  }
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  changeCurrentPassword,
+  getCurrentUser,
+  changeAvatar,
+  getAllUsers,
+};
