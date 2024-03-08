@@ -8,7 +8,8 @@ import {
   changeCurrentPassword,
   getCurrentUser,
   changeAvatar,
-  getAllUsers
+  getAllUsers,
+  changeCoverImage,
 } from "../controllers/user.controller.js";
 import { verifyjwt } from "../middlewares/user.middleware.js";
 
@@ -20,16 +21,19 @@ router.route("/register").post(
     { name: "coverImage", maxCount: 1 },
   ]),
   registerUser
-  );
-  router.route("/login").post(loginUser);
-  router.route("/getuser").get(getAllUsers);
-  // secured Routes
-  router.route("/logout").post(verifyjwt,logoutUser)
-  router.route("/refresh-token").post(refreshAccessToken)
-  router.route("/change-password").post(verifyjwt,changeCurrentPassword)
-  router.route("/current-user").post(verifyjwt,getCurrentUser)
-  router.route("/update-avatar").post(verifyjwt,upload.single("avatar"),changeAvatar)
-
-
+);
+router.route("/login").post(loginUser);
+router.route("/logout").post(verifyjwt, logoutUser);
+router.route("/getuser").get(getAllUsers);
+router.route("/change-password").post(verifyjwt, changeCurrentPassword);
+router
+  .route("/update-avatar")
+  .patch(verifyjwt, upload.single("avatar"), changeAvatar);
+router
+  .route("/update-coverImage")
+  .patch(verifyjwt, upload.single("coverImage"), changeCoverImage);
+router.route("/current-user").get(verifyjwt, getCurrentUser);
+router.route("/refresh-token").post(refreshAccessToken);
+router.route("/get-all-users").get(getAllUsers);
 
 export default router;
