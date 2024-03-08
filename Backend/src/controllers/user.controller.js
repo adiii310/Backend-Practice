@@ -48,6 +48,8 @@ const registerUser = asyncHandler(async (req, res) => {
   if (existingUser) {
     throw new ApiError(400, "User alerady Exits");
   }
+  console.log(req.file)
+  console.log("-------------------------------")
   const avatarLocalPath = req.files?.avatar[0]?.path;
   // const coverImageLocalPath = req.files?.coverImage[0]?.path;A
 
@@ -210,7 +212,7 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
   }
 
   user.password = newPassword;
-  await user.save({ validateBeforeSave: false });
+  await user.save();
 
   return res
     .status(200)
@@ -256,11 +258,11 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 const getAllUsers = asyncHandler(async (req, res) => {
   try {
-    const users = await User.find({}, "-password -refreshToken");
+    const users = await User.find({},"-password -refreshToken");
 
     return res
       .status(200)
-      .json(new ApiResponse(200, users, "Password changed successfully"));
+      .json(new ApiResponse(200,users,"all user"));
   } catch (error) {
     throw new ApiError(500, "An error occurred while retrieving users");
   }
