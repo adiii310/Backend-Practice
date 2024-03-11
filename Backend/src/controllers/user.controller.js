@@ -210,11 +210,11 @@ const changeAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(400, "avatar File not present");
   }
   const currentUser = await User.findById(req.user._id);
-  await deleteFromCloudinary(currentUser.avatar);
   const avatar = await uploadOnCloudinary(avatarLocalPath);
   if (!avatar) {
     throw new ApiError(500, "File doesnot upload on Cloudinary");
   }
+  await deleteFromCloudinary(currentUser.avatar);
   const user = await User.findByIdAndUpdate(
     req.user._id,
     {
@@ -237,11 +237,11 @@ const changeCoverImage = asyncHandler(async (req, res) => {
     throw new ApiError(400, "avatar File not present");
   }
   const currentUser = await User.findById(req.user._id);
-  await deleteFromCloudinary(currentUser.coverImage);
   const coverImage = await uploadOnCloudinary(avatarLocalPath);
   if (!coverImage) {
     throw new ApiError(500, "File doesnot upload on Cloudinary");
   }
+  await deleteFromCloudinary(currentUser.coverImage);
   const user = await User.findByIdAndUpdate(
     req.user._id,
     {
