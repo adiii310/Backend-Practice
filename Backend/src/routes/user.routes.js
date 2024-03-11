@@ -24,8 +24,7 @@ router.route("/register").post(
 );
 router.route("/login").post(loginUser);
 router.route("/logout").post(verifyjwt, logoutUser);
-router.route("/getuser").get(getAllUsers);
-router.route("/change-password").post(verifyjwt, changeCurrentPassword);
+router.route("/change-password").patch(verifyjwt, changeCurrentPassword);
 router
   .route("/update-avatar")
   .patch(verifyjwt, upload.single("avatar"), changeAvatar);

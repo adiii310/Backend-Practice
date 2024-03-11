@@ -49,8 +49,7 @@ const registerUser = asyncHandler(async (req, res) => {
   if (existingUser) {
     throw new ApiError(400, "User alerady Exits");
   }
-  console.log(req.file);
-  console.log("-------------------------------");
+ 
   const avatarLocalPath = req.files?.avatar[0]?.path;
   // const coverImageLocalPath = req.files?.coverImage[0]?.path;A
 
@@ -139,7 +138,7 @@ const logoutUser = asyncHandler(async (req, res) => {
   );
 
   const user = User.findById(req.user._id);
-  console.log(user);
+  
   res
     .status(200)
     .clearCookie("accessToken", options)
@@ -177,7 +176,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   const { accessToken, refreshToken } =
     await generateAccessTokenAndRefershToken(user._id);
 
-  console.log(accessToken);
+ 
 
   res
     .status(200)
