@@ -10,6 +10,7 @@ import {
   changeAvatar,
   getAllUsers,
   changeCoverImage,
+  getUserChannelProfile,
 } from "../controllers/user.controller.js";
 import { verifyjwt } from "../middlewares/user.middleware.js";
 
@@ -34,5 +35,6 @@ router
 router.route("/current-user").get(verifyjwt, getCurrentUser);
 router.route("/refresh-token").post(refreshAccessToken);
 router.route("/get-all-users").get(getAllUsers);
+router.route("/get-channel-profile/:userName").get(verifyjwt,getUserChannelProfile)
 
 export default router;
