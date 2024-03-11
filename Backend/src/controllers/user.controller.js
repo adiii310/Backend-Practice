@@ -49,8 +49,7 @@ const registerUser = asyncHandler(async (req, res) => {
   if (existingUser) {
     throw new ApiError(400, "User alerady Exits");
   }
-  console.log(req.file);
-  console.log("-------------------------------");
+
   const avatarLocalPath = req.files?.avatar[0]?.path;
   // const coverImageLocalPath = req.files?.coverImage[0]?.path;A
 
@@ -139,7 +138,7 @@ const logoutUser = asyncHandler(async (req, res) => {
   );
 
   const user = User.findById(req.user._id);
-  console.log(user);
+
   res
     .status(200)
     .clearCookie("accessToken", options)
@@ -177,8 +176,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   const { accessToken, refreshToken } =
     await generateAccessTokenAndRefershToken(user._id);
 
-  console.log(accessToken);
-
   res
     .status(200)
     .cookie("accessToken", accessToken, options)
@@ -197,7 +194,7 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
   }
 
   user.password = newPassword;
-  await user.save();
+  await user.save({ validateBeforeSave: false });
 
   return res
     .status(200)
@@ -211,11 +208,11 @@ const changeAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(400, "avatar File not present");
   }
   const currentUser = await User.findById(req.user._id);
-  await deleteFromCloudinary(currentUser.avatar);
   const avatar = await uploadOnCloudinary(avatarLocalPath);
   if (!avatar) {
     throw new ApiError(500, "File doesnot upload on Cloudinary");
   }
+  await deleteFromCloudinary(currentUser.avatar);
   const user = await User.findByIdAndUpdate(
     req.user._id,
     {
@@ -238,11 +235,11 @@ const changeCoverImage = asyncHandler(async (req, res) => {
     throw new ApiError(400, "avatar File not present");
   }
   const currentUser = await User.findById(req.user._id);
-  await deleteFromCloudinary(currentUser.coverImage);
   const coverImage = await uploadOnCloudinary(avatarLocalPath);
   if (!coverImage) {
     throw new ApiError(500, "File doesnot upload on Cloudinary");
   }
+  await deleteFromCloudinary(currentUser.coverImage);
   const user = await User.findByIdAndUpdate(
     req.user._id,
     {
@@ -277,6 +274,78 @@ const getAllUsers = asyncHandler(async (req, res) => {
   }
 });
 
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+  const { userName } = req.params;
+  console.log(userName)
+  if (!userName?.trim()) {
+    throw new ApiError(400, "Username is missing");
+  }
+
+  const channel = await User.aggregate([
+    {
+      $match: {
+        userName: userName?.toLowerCase(),
+      },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "channel",
+        as: "subscribers",
+      },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "subscriber",
+        as: "subscribed_to",
+      },
+    },
+    {
+      $addFields: {
+        subscribersCount: {
+          $size: "$subscribers",
+        },
+        subscribedTo: {
+          $size: "$subscribed_to",
+        },
+        isSubscribed: {
+          $cond: {
+            if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        fullName: 1,
+        userName: 1,
+        avatar: 1,
+        coverImage: 1,
+        email: 1,
+        subscribersCount: 1,
+        subscribedTo: 1,
+        isSubscribed:1,
+      },
+    },
+  ]);
+  
+  console.log(channel);
+
+  if(!channel?.length){
+    throw new ApiError(400,"channel doesnot exist");
+  }
+
+  return res
+  .status(200)
+  .json(
+    new ApiResponse(200,channel[0],"userChannel fetched succesfully")
+  )
+});
 export {
   registerUser,
   loginUser,
@@ -287,4 +356,5 @@ export {
   changeAvatar,
   changeCoverImage,
   getAllUsers,
+  getUserChannelProfile,
 };
