@@ -65,9 +65,9 @@ const registerUser = asyncHandler(async (req, res) => {
   if (!avatarLocalPath) {
     throw new ApiError(400, "avatar file not present");
   }
-  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath,"test-folder/images","image");
 
-  const avatar = await uploadOnCloudinary(avatarLocalPath);
+  const avatar = await uploadOnCloudinary(avatarLocalPath,"test-folder/images","image");
   if (!avatar) {
     throw new ApiError(400, "avatar file not present");
   }
@@ -208,7 +208,7 @@ const changeAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(400, "avatar File not present");
   }
   const currentUser = await User.findById(req.user._id);
-  const avatar = await uploadOnCloudinary(avatarLocalPath);
+  const avatar = await uploadOnCloudinary(avatarLocalPath,"test-folder/images","image");
   if (!avatar) {
     throw new ApiError(500, "File doesn't upload on Cloudinary");
   }
@@ -235,7 +235,7 @@ const changeCoverImage = asyncHandler(async (req, res) => {
     throw new ApiError(400, "avatar File not present");
   }
   const currentUser = await User.findById(req.user._id);
-  const coverImage = await uploadOnCloudinary(avatarLocalPath);
+  const coverImage = await uploadOnCloudinary(avatarLocalPath,"test-folder/images","image");
   if (!coverImage) {
     throw new ApiError(500, "File doesn't upload on Cloudinary");
   }
