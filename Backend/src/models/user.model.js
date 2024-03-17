@@ -9,7 +9,7 @@ const userSchema = new Schema(
       required: true,
       unique: true,
       lowercase: true,
-      trin: true,
+      trim: true,
       index: true,
     },
     email: {
@@ -59,32 +59,28 @@ userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
-userSchema.methods.generateAcessToken = function () {
-    return jwt.sign(
-        {
-            _id:this._id,
-
-        },
-        process.env.SECRET_ACCESS_TOKEN,
-        {
-            expiresIn: process.env.EXPIRY_ACCESS_TOKEN
-        }
-    )
+userSchema.methods.generateAccessToken = function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+    },
+    process.env.SECRET_ACCESS_TOKEN,
+    {
+      expiresIn: process.env.EXPIRY_ACCESS_TOKEN,
+    }
+  );
 };
 
 userSchema.methods.generateRefreshToken = function () {
-    return jwt.sign(
-        {
-            _id:this._id,
-          
-        },
-        process.env.SECRET_REFRESH_TOKEN,
-        {
-            expiresIn: process.env.EXPIRY_REFRESH_TOKEN
-        }
-    )
+  return jwt.sign(
+    {
+      _id: this._id,
+    },
+    process.env.SECRET_REFRESH_TOKEN,
+    {
+      expiresIn: process.env.EXPIRY_REFRESH_TOKEN,
+    }
+  );
 };
 
-
 export const User = mongoose.model("User", userSchema);
-

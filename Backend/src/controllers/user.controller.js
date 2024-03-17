@@ -12,7 +12,7 @@ import { options } from "../constants.js";
 const generateAccessTokenAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
-    const accessToken = user.generateAcesToken();
+    const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
     user.refreshToken = refreshToken;
     user.save({ validateBeforeSave: false });
